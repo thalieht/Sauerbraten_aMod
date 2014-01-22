@@ -2,6 +2,10 @@
 
 namespace game
 {
+    VARP(friendnotify, 0, 1, 1);     // toggle friend online/offline sound
+    VARP(chatsounds, 0, 1, 1);       // toggle chat sounds
+    VARP(friendoperationsounds, 0, 1, 1); // toggle friend sounds during operations with friendlist
+
     VARP(minradarscale, 0, 384, 10000);
     VARP(maxradarscale, 1, 1024, 10000);
     VARP(radarteammates, 0, 1, 1);
@@ -1245,6 +1249,8 @@ namespace game
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
                     particle_textcopy(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
                 conoutf(CON_CHAT, "%s:\f0 %s", colorname(d), text);
+
+                if(chatsounds) isfriend(d->name) > 0 ? playsound(S_FRIENDSCHAT) : playsound(S_ALLCHAT);
                 break;
             }
 
@@ -1258,6 +1264,8 @@ namespace game
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, 0x6496FF, 4.0f, -8);
                 conoutf(CON_TEAMCHAT, "%s:\f1 %s", colorname(t), text);
+
+                if(chatsounds) isfriend(t->name) > 0 ? playsound(S_FRIENDSCHAT) : playsound(S_ALLCHAT);
                 break;
             }
 
@@ -1313,10 +1321,22 @@ namespace game
                 if(d->name[0])          // already connected
                 {
                     if(strcmp(d->name, text) && !isignored(d->clientnum))
+                    {
                         conoutf("%s is now known as %s", colorname(d), colorname(d, text));
+                        if(isfriend(colorname(d, text)) > 0)
+                        {
+                            if(friendnotify) playsound(S_ONLINE);
+                            conoutf("%s renamed to \f9%s", colorname(d), colorname(d, text));
+                        }
+                    }
                 }
                 else                    // new client
                 {
+                    if(isfriend(colorname(d, text)) > 0)
+                    {
+                        if(friendnotify) playsound(S_ONLINE);
+                        conoutf("\f9%s IS HERE", colorname(d, text));
+                    }
                     conoutf("\f0join:\f7 %s", colorname(d, text));
                     if(needclipboard >= 0) needclipboard++;
                 }
@@ -1987,5 +2007,297 @@ namespace game
         player1->resetinterp();
     }
     COMMAND(gotosel, "");
+
+    inline void replacelastchar(char *NameFromFile)
+    {
+        int Length_Of_String = strlen(NameFromFile) -1; // if last character of line
+        if( NameFromFile[Length_Of_String] == '\n')     // is '\n'
+            NameFromFile[Length_Of_String] = '\0';      // replace it with '\0'
+    }
+
+    unsigned short isfriend(const char *PlayerName)
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_Pointer = fopen("aMod\\friendlist.cfg","r");
+        if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+        else while (fgets (NameFromFile, sizeof NameFromFile, file_Pointer) != NULL)
+        {
+            replacelastchar(NameFromFile);
+            if(strcmp(NameFromFile, PlayerName) == 0)
+            {
+                ++FriendCounter;
+                break;
+            }
+        }
+        fclose(file_Pointer);
+        return FriendCounter;
+    }
+
+    void fadd(const char *PlayerName)
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_Pointer = fopen("aMod\\friendlist.cfg","a+");
+        if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file.");
+        else while (fgets(NameFromFile, 16, file_Pointer) != NULL)
+        {
+            replacelastchar(NameFromFile);
+            if(strcmp(NameFromFile, PlayerName) == 0)
+            {
+                ++FriendCounter;
+                conoutf("\f9%s \f2is already in your friendlist.", PlayerName);
+                if(friendoperationsounds) playsound(S_FRIENDEXISTS);
+            }
+        }
+        if(FriendCounter == 0)
+        {
+            if(ftell(file_Pointer) != 0)    // check if file is empty
+                fputc('\n', file_Pointer);
+            fputs(PlayerName, file_Pointer);
+            conoutf("\f2Added \f9%s \f2to your friendlist.", PlayerName);
+            if(friendoperationsounds) playsound(S_FRIENDADDED);
+        }
+        fclose(file_Pointer);
+    }
+
+    ICOMMAND(fadd, "s", (char *PlayerName), fadd(PlayerName));
+
+    void faddcn(int cn)
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_Pointer = fopen("aMod\\friendlist.cfg","a+");
+        if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file.");
+        else while (fgets(NameFromFile, sizeof NameFromFile, file_Pointer) != NULL)
+        {
+            replacelastchar(NameFromFile);
+            if(strcmp(NameFromFile, getclientname(cn)) == 0)
+            {
+                conoutf("\f9%s \f2is already in your friendlist.", getclientname(cn));
+                if(friendoperationsounds) playsound(S_FRIENDEXISTS);
+                ++FriendCounter;
+            }
+        }
+        if(FriendCounter == 0)
+        {
+            if(ftell(file_Pointer) != 0)    // check if file is empty
+                fputc('\n', file_Pointer);
+            if(strcmp(getclientname(cn), "") != 0)
+            {
+                fputs(getclientname(cn), file_Pointer);
+                conoutf("\f2Added \f9%s \f2to friendlist.", getclientname(cn));
+                if(friendoperationsounds) playsound(S_FRIENDADDED);
+            }
+            else conoutf("Name not found.");
+        }
+        fclose(file_Pointer);
+    }
+
+    ICOMMAND(faddcn, "i", (int *cn), faddcn(*cn));
+
+    void frm(char *PlayerName)
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_PointerOLD = fopen("aMod\\friendlist.cfg","r");
+        FILE *file_PointerNEW = fopen("aMod\\temp.cfg","w");
+        if (file_PointerNEW == NULL) conoutf("\f3ERROR: Couldn't create temp file aMod/temp.cfg");
+        if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+        else while (fgets (NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
+        {
+            replacelastchar(NameFromFile);
+            if(strcmp(NameFromFile, PlayerName) == 0)
+                ++FriendCounter;
+        }
+        if(FriendCounter == 0)
+        {
+            conoutf("\f2Could not find \f3%s", PlayerName);
+            if(friendoperationsounds) playsound(S_FRIENDNOTFOUND);
+            fclose(file_PointerOLD);
+            fclose(file_PointerNEW);
+        }
+        if(FriendCounter > 0) // reading again, costs less than writting (ssd's)
+        {
+            fclose(file_PointerOLD);                                // if i dont reopen it wont work
+            file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // dunno why
+            if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't reopen file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+            while (fgets(NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
+            {
+                replacelastchar(NameFromFile);
+                if(strcmp(NameFromFile, PlayerName) != 0)
+                {
+                    if(ftell(file_PointerNEW) != 0)         // check if file is empty
+                        fputc('\n', file_PointerNEW);
+                    fputs(NameFromFile, file_PointerNEW);
+                }
+            }
+            conoutf("\f3%s \f2has been \f3deleted \f2from your friendlist.", PlayerName);
+            if(friendoperationsounds) playsound(S_FRIENDREMOVED);
+            fclose(file_PointerOLD);
+            fclose(file_PointerNEW);
+            remove("aMod\\friendlist.cfg");
+            rename("aMod\\temp.cfg", "aMod\\friendlist.cfg" );
+        }
+    }
+
+    ICOMMAND(frm, "s", (char *PlayerName), frm(PlayerName));
+
+    void frmpos(int position)
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_PointerOLD = fopen("aMod\\friendlist.cfg","r");
+        FILE *file_PointerNEW = fopen("aMod\\temp.cfg","w");
+        if (file_PointerNEW == NULL) conoutf("\f3ERROR: Couldn't create temp file aMod/temp.cfg");
+        if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+        else while (fgets(NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
+            ++FriendCounter;
+        if((position > FriendCounter) || (position < 1))
+        {
+            if(FriendCounter == 0)
+            {
+                conoutf("\f3Noone to remove, Friendlist is empty.");
+                if(friendoperationsounds) playsound(S_FRIENDNOTFOUND);
+            }
+            else if (FriendCounter > 1)
+            {
+                conoutf("Invalid input, you can only choose \f31...%d\f3", FriendCounter);
+                if(friendoperationsounds) playsound(S_FRIENDNOTFOUND);
+            }
+            else if (FriendCounter == 1)
+            {
+                conoutf("Invalid input, you can only use \f31");
+                if(friendoperationsounds) playsound(S_FRIENDNOTFOUND);
+            }
+            fclose(file_PointerOLD);
+            fclose(file_PointerNEW);
+        }
+        else // reading again, costs less than writting (ssd's)
+        {
+            fclose(file_PointerOLD);                                // if i dont reopen it, it wont work
+            file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // dunno why
+            if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't reopen file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+            unsigned short index = 0;
+            while (fgets(NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
+            {
+                ++index;
+                replacelastchar(NameFromFile);
+                if(index != position)
+                {
+                    if(ftell(file_PointerNEW) != 0)         // check if file is empty
+                        fputc('\n', file_PointerNEW);
+                    fputs(NameFromFile, file_PointerNEW);
+                }
+                else if(index == position)
+                {
+                    conoutf("\f3%d. %s \f2has been \f3deleted \f2from your friendlist.", index, NameFromFile);
+                    if(friendoperationsounds) playsound(S_FRIENDREMOVED);
+                }
+            }
+            fclose(file_PointerOLD);
+            fclose(file_PointerNEW);
+            remove("aMod\\friendlist.cfg");
+            rename("aMod\\temp.cfg", "aMod\\friendlist.cfg" );
+        }
+    }
+
+    ICOMMAND(frmpos, "i", (int *pos), frmpos(*pos));
+
+    void frmcn(int cn)
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_PointerOLD = fopen("aMod\\friendlist.cfg","r");
+        FILE *file_PointerNEW = fopen("aMod\\temp.cfg","w");
+        if (file_PointerNEW == NULL) conoutf("\f3ERROR: Couldn't create temp file aMod/temp.cfg");
+        if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+        else while (fgets(NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
+        {
+            replacelastchar(NameFromFile);
+            if(strcmp(NameFromFile, getclientname(cn)) == 0)
+                ++FriendCounter;
+        }
+        if(FriendCounter == 0)
+        {
+            conoutf("\f2Could not find \f3%s", getclientname(cn));
+            if(friendoperationsounds) playsound(S_FRIENDNOTFOUND);
+            fclose(file_PointerOLD);
+            fclose(file_PointerNEW);
+        }
+        if(FriendCounter > 0) // reading again, costs less than writting (ssd's)
+        {
+            fclose(file_PointerOLD);                                // if i dont reopen it
+            file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // it wont work, dunno why
+            if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't reopen file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+            while (fgets(NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
+            {
+                replacelastchar(NameFromFile);
+                if(strcmp(NameFromFile, getclientname(cn)) != 0)
+                {
+                    if(ftell(file_PointerNEW) != 0)         // check if file is empty
+                        fputc('\n', file_PointerNEW);
+                    fputs(NameFromFile, file_PointerNEW);
+                }
+            }
+            conoutf("\f3%s \f2has been \f3deleted \f2from your friendlist.", getclientname(cn));
+            if(friendoperationsounds) playsound(S_FRIENDREMOVED);
+            fclose(file_PointerOLD);
+            fclose(file_PointerNEW);
+            remove("aMod\\friendlist.cfg");
+            rename("aMod\\temp.cfg", "aMod\\friendlist.cfg" );
+        }
+    }
+
+    ICOMMAND(frmcn, "i", (int *cn), frmcn(*cn));
+
+    void emptymyfriendlist()
+    {
+        FILE *file_Pointer = fopen("aMod\\friendlist.cfg","w");
+        fclose(file_Pointer);
+        conoutf("Friendlist has been \f3purged.");
+    }
+
+    ICOMMAND(emptymyfriendlist, "", (), emptymyfriendlist());
+
+    void flist()
+    {
+        char NameFromFile[16];
+        unsigned short FriendCounter = 0;
+        FILE *file_Pointer = fopen("aMod\\friendlist.cfg","r");
+        if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
+        else while (fgets(NameFromFile, sizeof NameFromFile, file_Pointer) != NULL)
+        {
+            replacelastchar(NameFromFile);
+            conoutf("\f3%d. \f9%s", FriendCounter +1, NameFromFile);
+            ++FriendCounter;
+        }
+        if(FriendCounter > 1)
+            conoutf("\f2There are \f6%d \f2friends in your friendlist.", FriendCounter);
+        else if(FriendCounter == 1)
+            conoutf("\f2There is \f6%d \f2friend in your friendlist.", FriendCounter);
+        else conoutf("\f2You have no friends :'(");
+        fclose(file_Pointer);
+    }
+
+    ICOMMAND(flist, "", (), flist());
+
+    void fhelp()
+    {
+        conoutf("/highlightcolor 0x000000-0xFFFFFF  \f0highlight color of yourself in scoreboard.");
+        conoutf("/fhighlightcolor 0x000000-0xFFFFFF  \f0highlight color of your friends in scoreboard.");
+        conoutf("/friendoperationsounds 0-1   \f0sounds when you use commands to interact with friendlist.");
+        conoutf("/chatsounds 0-1   \f0sounds when you receive chat.");
+        conoutf("/friendnotify 0-1   \f0sound when a friend joins or leaves.");
+        conoutf("/emptymyfriendlist \f3deletes everyone \f0in your friendlist.");
+        conoutf("/flist            \f0displays a list of your friends in the console.");
+        conoutf("/frm name      \f3F\f0riend \f3R\f0e\f3M\f0ove by name.");
+        conoutf("/frmcn cn       \f3F\f0riend \f3R\f0e\f3M\f0ove by \f3C\f0lient \f3N\f0umber (must be in same server as him).");
+        conoutf("/frmpos number  \f3F\f0riend \f3R\f0e\f3M\f0ove by his \f3POS\f0ition in friend list (/flist or look in friendlist.cfg).");
+        conoutf("/fadd name     \f3F\f0riend \f3ADD\f0 by name.");
+        conoutf("/faddcn cn      \f3F\f0riend \f3ADD\f0 by \f3C\f0lient \f3N\f0umber (must be in same server as him).");
+    }
+
+    ICOMMAND(fhelp, "", (), fhelp());
 }
 

@@ -3,6 +3,9 @@
 
 namespace game
 {
+    HVARP(fhighlightcolor, 0x000000, 0x80C880, 0xFFFFFF); // highlight color of your friends in scoreboard
+    HVARP(highlightcolor, 0x000000, 0x808080, 0xFFFFFF);  // highlight color of yourself in scoreboard
+
     VARP(scoreboard2d, 0, 1, 1);
     VARP(showservinfo, 0, 1, 1);
     VARP(showclientnum, 0, 0, 1);
@@ -204,15 +207,19 @@ namespace game
             g.text("", 0, " ");
             loopscoregroup(o,
             {
-                if(o==player1 && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1))
+                int FriendClientNum = -1;
+                if(isfriend(o->name) > 0)
+                    FriendClientNum = o->clientnum;
+                if((o->clientnum==FriendClientNum || o==player1) && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1))
                 {
                     g.pushlist();
-                    g.background(0x808080, numgroups>1 ? 3 : 5);
+                    g.background(o==player1 ? highlightcolor : fhighlightcolor, numgroups>1 ? 3 : 5);
                 }
                 const playermodelinfo &mdl = getplayermodelinfo(o);
                 const char *icon = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? mdl.blueicon : mdl.redicon) : mdl.ffaicon;
                 g.text("", 0, icon);
-                if(o==player1 && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1)) g.poplist();
+                if((o->clientnum==FriendClientNum || o==player1) && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1))
+                    g.poplist();
             });
             g.poplist();
 
@@ -226,7 +233,7 @@ namespace game
                 g.pushlist(); // horizontal
             }
 
-            if(!cmode || !cmode->hidefrags())
+ //           if(!cmode || !cmode->hidefrags())
             {
                 g.pushlist();
                 g.strut(6);
@@ -316,13 +323,18 @@ namespace game
                     fpsent *o = spectators[i];
                     int status = 0xFFFFDD;
                     if(o->privilege) status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
-                    if(o==player1 && highlightscore)
+
+                    int FriendClientNum = -1;
+                    if(isfriend(o->name) > 0)
+                        FriendClientNum = o->clientnum;
+
+                    if((o->clientnum==FriendClientNum || o==player1) && highlightscore)
                     {
                         g.pushlist();
-                        g.background(0x808080, 3);
+                        g.background(o==player1 ? highlightcolor : fhighlightcolor, 3);
                     }
                     g.text(colorname(o), status, "spectator");
-                    if(o==player1 && highlightscore) g.poplist();
+                    if((o->clientnum==FriendClientNum || o==player1) && highlightscore) g.poplist();
                 }
                 g.poplist();
 
@@ -347,13 +359,18 @@ namespace game
                     fpsent *o = spectators[i];
                     int status = 0xFFFFDD;
                     if(o->privilege) status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
-                    if(o==player1 && highlightscore)
+
+                    int FriendClientNum = -1;
+                    if(isfriend(o->name) > 0)
+                        FriendClientNum = o->clientnum;
+
+                    if((o->clientnum==FriendClientNum || o==player1) && highlightscore)
                     {
                         g.pushlist();
-                        g.background(0x808080);
+                        g.background(o==player1 ? highlightcolor : fhighlightcolor);
                     }
                     g.text(colorname(o), status);
-                    if(o==player1 && highlightscore) g.poplist();
+                    if((o->clientnum==FriendClientNum || o==player1) && highlightscore) g.poplist();
                     if(i+1<spectators.length() && (i+1)%3) g.space(1);
                     else g.poplist();
                 }

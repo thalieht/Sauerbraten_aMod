@@ -712,15 +712,17 @@ namespace game
             }
             if(randomcolor)
             {
-                case 0: // same color for all trails per shot
-                    { // braces needed because of variables scope
-                        long colorbuffer1 = rnd(16777216);
-                        outputLig = colorbuffer1;
-                        outputSmok = colorbuffer1;
-                        outputLas = colorbuffer1;
+                switch(randomchoice)
+                {
+                    case 0: // same color for all trails per shot
+                    {       // braces needed because of variables scope
+                        long colorbuffer = rnd(16777216);
+                        outputLig = colorbuffer;
+                        outputSmok = colorbuffer;
+                        outputLas = colorbuffer;
                         break;
                     }
-                case 1: // different color per trail per shot
+                    case 1: // different color per trail per shot
                     {
                         long colorbuffer1 = rnd(16777216);
                         long colorbuffer2 = rnd(16777216);
@@ -730,6 +732,7 @@ namespace game
                         outputLas = colorbuffer3;
                         break;
                     }
+                }
             }
             particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f, 150); //already existed
             if(lightninBLUE && lightninRED) // must be first, otherwise if any of the others is 1 it wont execute the else if's

@@ -2,6 +2,8 @@
 
 namespace game
 {
+    VARP(tksound, 0, 1, 1);
+
     bool intermission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int respawnent = -1;
@@ -424,7 +426,11 @@ namespace game
         {
             contype |= CON_TEAMKILL;
             if(actor==player1) conoutf(contype, "\f6%s fragged a teammate (%s)", aname, dname);
-            else if(d==player1) conoutf(contype, "\f6%s got fragged by a teammate (%s)", dname, aname);
+            else if(d==player1)
+            {
+                conoutf(contype, "\f6%s got fragged by a teammate (%s)", dname, aname);
+                if(tksound) playsound(S_TEAMKILL);
+            }
             else conoutf(contype, "\f2%s fragged a teammate (%s)", aname, dname);
         }
         else
@@ -499,6 +505,8 @@ namespace game
         return clients.inrange(cn) ? clients[cn] : NULL;
     }
 
+    extern int friendnotify;
+
     void clientdisconnected(int cn, bool notify)
     {
         if(!clients.inrange(cn)) return;
@@ -510,7 +518,17 @@ namespace game
         unignore(cn);
         fpsent *d = clients[cn];
         if(!d) return;
-        if(notify && d->name[0]) conoutf("\f4leave:\f7 %s", colorname(d));
+
+        if(notify && d->name[0])
+        {
+            conoutf("\f4leave:\f7 %s", colorname(d));
+            if(isfriend(colorname(d)) > 0)
+            {
+                if(friendnotify) playsound(S_LEFT);
+                conoutf("\f4%s\f~ HAS LEFT", colorname(d));
+            }
+        }
+
         removeweapons(d);
         removetrackedparticles(d);
         removetrackeddynlights(d);
