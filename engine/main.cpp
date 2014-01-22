@@ -1168,7 +1168,8 @@ int main(int argc, char **argv)
     execfile("data/keymap.cfg");
     execfile("data/stdedit.cfg");
     execfile("data/menus.cfg");
-    execfile("data/sounds.cfg");
+    execfile("aMod/sounds.cfg");
+   // execfile("data/sounds.cfg");
     execfile("data/brush.cfg");
     execfile("mybrushes.cfg", false);
     if(game::savedservers()) execfile(game::savedservers(), false);
