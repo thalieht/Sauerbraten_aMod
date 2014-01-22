@@ -563,6 +563,34 @@ namespace game
     VARP(muzzleflash, 0, 1, 1);
     VARP(muzzlelight, 0, 1, 1);
 
+    VARP(randomcolor, 0, 1, 1); // (input_name_variable, min value, current_value (default), max_value) // toggle random trail color options
+    VARP(teamseperate, 0, 1, 1);                        // toggle if shot colors are determined by team
+    VARP(randomchoice, 0, 1, 1);                        // toggle: 1==ALL shot trails color are random and independent from each other. 2==Shot color is random but same color for all trails per shot
+    VARP(smokezBLUE, 0, 1, 1);                          // toggle blue team's smoke trail
+    VARP(lightninBLUE, 0, 0, 1);                        // toggle blue team's lightning trail
+    VARP(laserpewpewBLUE, 0, 0, 1);                     // toggle blue team's laser trail
+    VARP(smokezRED, 0, 0, 1);                           // toggle red team's smoke trail
+    VARP(lightninRED, 0, 1, 1);                         // toggle red team's lightning trail
+    VARP(laserpewpewRED, 0, 0, 1);                      // toggle red team's laser trail
+    FVARP(lasertrailwidth, 0.0001f, 1.5f, 50.0f);       // size of laser trail
+    FVARP(smoketrailwidth, 0.0001f, 0.76f, 50.0f);      // size of smoke trail
+    FVARP(lightningtrailwidth, 0.0001f, 0.5f, 50.0f);   // size of lightning trail
+    VARP(RI_PARTb, 0, 0, 5);                            // choose particle for blue team's smoke trail
+    VARP(RI_PARTr, 0, 0, 5);                            // choose particle for red team's smoke trail
+    VARP(grav, -50, 20, 50);                            // gravity for smoke trail. the closer to zero, the faster it travels
+    VARP(li_duratio, 1, 900, 10000); // in milliseconds // duration of lightning trail
+    VARP(s_duratio,1, 600, 10000); // in milliseconds   // duration of smoke trail
+    VARP(la_duratio,1, 1400, 10000); // in milliseconds // duration of laser trail
+    HVARP(inputLigBLUE, 0x000000, 0xFF01FF, 0xFFFFFF);  // iput variable from gui
+    HVARP(inputSmokBLUE, 0x000000, 0xFF01FF, 0xFFFFFF); // iput variable from gui
+    HVARP(inputLasBLUE, 0x000000, 0xFF01FF, 0xFFFFFF);  // iput variable from gui
+    HVARP(inputLigRED, 0x000000, 0xFF01FF, 0xFFFFFF);   // iput variable from gui
+    HVARP(inputSmokRED, 0x000000, 0xFF01FF, 0xFFFFFF);  // iput variable from gui
+    HVARP(inputLasRED, 0x000000, 0xFF01FF, 0xFFFFFF);   // iput variable from gui
+    HVARP(inputLig, 0x000000, 0xFF01FF, 0xFFFFFF);      // iput variable from gui
+    HVARP(inputSmok, 0x000000, 0xFF01FF, 0xFFFFFF);     // iput variable from gui
+    HVARP(inputLas, 0x000000, 0xFF01FF, 0xFFFFFF);      // iput variable from gui
+
     void shoteffects(int gun, const vec &from, const vec &to, fpsent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
         int sound = guns[gun].sound, pspeed = 25;
@@ -623,8 +651,125 @@ namespace game
             }
 
             case GUN_RIFLE:
-                particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f);
-                particle_trail(PART_SMOKE, 500, hudgunorigin(gun, from, to, d), to, 0x404040, 0.6f, 20);
+                int RI_PARb = 0; // stands for Rifle Particle Blue (team)
+                switch(RI_PARTb)
+                {
+                    case 0:                     // if RI_PARTb == 0
+                        RI_PARb = PART_SMOKE;   // put the value of PART_SMOKE in RI_PARb
+                        break;                  // exit switch
+                    case 1:
+                        RI_PARb = PART_STEAM;
+                        break;
+                    case 2:                     // else if RI_PARTb == 2
+                        RI_PARb = PART_WATER;   // put the value of PART_SNOW in RI_PARb
+                        break;                  // exit switch
+                    case 3:
+                        RI_PARb = PART_SNOW;
+                        break;
+                    case 4:
+                        RI_PARb = PART_FLAME;
+                        break;
+                    case 5:
+                        RI_PARb = PART_SPARK;
+                        break;
+                }
+                int RI_PARr = 0; // stands for Rifle Particle Red (team)
+                switch(RI_PARTr)
+                {
+                    case 0:
+                        RI_PARr = PART_SMOKE;
+                        break;
+                    case 1:
+                        RI_PARr = PART_STEAM;
+                        break;
+                    case 2:
+                        RI_PARr = PART_WATER;
+                        break;
+                    case 3:
+                        RI_PARr = PART_SNOW;
+                        break;
+                    case 4:
+                        RI_PARr = PART_FLAME;
+                        break;
+                    case 5:
+                        RI_PARr = PART_SPARK;
+                        break;
+                }
+            int outputLig, outputSmok, outputLas;
+            if(teamseperate)
+            {
+            // Comment: if player X is in same team as you (blue) we use the color from inputLig/Smok/LasBLUE variable, else from inputLig/Smok/LasRED
+
+                (isteam(d->team, player1->team)) ? outputLig=inputLigBLUE : outputLig=inputLigRED;
+                (isteam(d->team, player1->team)) ? outputSmok=inputSmokBLUE : outputSmok=inputSmokRED;
+                (isteam(d->team, player1->team)) ? outputLas=inputLasBLUE : outputLas=inputLasRED;
+            }
+            else if(!teamseperate)
+            {
+                outputLig=inputLig;
+                outputSmok=inputSmok;
+                outputLas=inputLas;
+            }
+            if(randomcolor)
+            {
+                case 0: // same color for all trails per shot
+                    { // braces needed because of variables scope
+                        long colorbuffer1 = rnd(16777216);
+                        outputLig = colorbuffer1;
+                        outputSmok = colorbuffer1;
+                        outputLas = colorbuffer1;
+                        break;
+                    }
+                case 1: // different color per trail per shot
+                    {
+                        long colorbuffer1 = rnd(16777216);
+                        long colorbuffer2 = rnd(16777216);
+                        long colorbuffer3 = rnd(16777216);
+                        outputLig = colorbuffer1;
+                        outputSmok = colorbuffer2;
+                        outputLas = colorbuffer3;
+                        break;
+                    }
+            }
+            particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f, 150); //already existed
+            if(lightninBLUE && lightninRED) // must be first, otherwise if any of the others is 1 it wont execute the else if's
+                particle_flare(hudgunorigin(gun, from, to, d), to, li_duratio, PART_LIGHTNING, outputLig, lightningtrailwidth);
+            else if(lightninBLUE)
+            {
+                isteam(d->team, player1->team) ? particle_flare(hudgunorigin(gun, from, to, d), to, li_duratio, PART_LIGHTNING, outputLig, lightningtrailwidth) :
+                    particle_flare(hudgunorigin(gun, from, to, d), to, li_duratio, NULL, 3, lasertrailwidth); // disabler (replaced color with 3 and its disabled)
+            }
+            else if(lightninRED)
+            {
+                !isteam(d->team, player1->team) ? particle_flare(hudgunorigin(gun, from, to, d), to, li_duratio, PART_LIGHTNING, outputLig, lightningtrailwidth) :
+                    particle_flare(hudgunorigin(gun, from, to, d), to, li_duratio, NULL, 3, lasertrailwidth); // disabler (replaced color with 3 and its disabled)
+            }
+            if(smokezBLUE && smokezRED) // must be first, otherwise if any of the others is 1 it wont execute the else if's
+                particle_trail(isteam(d->team, player1->team) ? RI_PARb : RI_PARr , s_duratio, hudgunorigin(gun, from, to, d), to, outputSmok, smoketrailwidth, grav);
+            else if(smokezBLUE)
+            {
+                isteam(d->team, player1->team) ? particle_trail(RI_PARb, s_duratio, hudgunorigin(gun, from, to, d), to, outputSmok, smoketrailwidth, grav) :
+                    particle_flare(hudgunorigin(gun, from, to, d), to, s_duratio, NULL, 3, lasertrailwidth); // disabler (replaced color with 3 and its disabled)
+            }
+            else if(smokezRED)
+            {
+                !isteam(d->team, player1->team) ? particle_trail(RI_PARr, s_duratio, hudgunorigin(gun, from, to, d), to, outputSmok, smoketrailwidth, grav) :
+                    particle_flare(hudgunorigin(gun, from, to, d), to, s_duratio, NULL, 3, lasertrailwidth); // disabler (replaced color with 3 and its disabled)
+            }
+            if(laserpewpewBLUE && laserpewpewRED) // must be first, otherwise if any of the others is 1 it wont execute the else if's
+                particle_flare(hudgunorigin(gun, from, to, d), to, la_duratio, PART_STREAK, outputLas, lasertrailwidth);
+            else if(laserpewpewBLUE)
+            {
+                isteam(d->team, player1->team) ? particle_flare(hudgunorigin(gun, from, to, d), to, la_duratio, PART_STREAK, outputLas, lasertrailwidth) :
+                    particle_flare(hudgunorigin(gun, from, to, d), to, la_duratio, NULL, 3, lasertrailwidth);
+            }
+            else if(laserpewpewRED)
+            {
+                !isteam(d->team, player1->team) ? particle_flare(hudgunorigin(gun, from, to, d), to, la_duratio, PART_STREAK, outputLas, lasertrailwidth) :
+                    particle_flare(hudgunorigin(gun, from, to, d), to, la_duratio, NULL, 3, lasertrailwidth); // disabler (replaced color with 3 and its disabled)
+            }
+         //       particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f);
+         //       particle_trail(PART_SMOKE, 500, hudgunorigin(gun, from, to, d), to, 0x404040, 0.6f, 20);
                 if(muzzleflash && d->muzzle.x >= 0)
                     particle_flare(d->muzzle, d->muzzle, 150, PART_MUZZLE_FLASH3, 0xFFFFFF, 1.25f, d);
                 if(!local) adddecal(DECAL_BULLET, to, vec(from).sub(to).normalize(), 3.0f);
