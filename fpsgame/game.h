@@ -196,19 +196,42 @@ enum
     S_V_QUAD, S_V_QUAD10,
     S_V_RESPAWNPOINT,
 
-    S_FLAGPICKUP,
-    S_FLAGDROP,
-    S_FLAGRETURN,
-    S_FLAGSCORE,
-    S_FLAGRESET,
+    S_FLAGPICKUP,   // wont be used anymore
+    S_FLAGDROP,     // wont be used anymore
+    S_FLAGRETURN,   // wont be used anymore
+    S_FLAGSCORE,    // wont be used anymore
+    S_FLAGRESET,    // wont be used anymore
+
+    S_BLUE_PICKUP,
+    S_BLUE_DROPPED,
+    S_BLUE_RETURNED,
+    S_BLUE_SCORE,
+    S_BLUE_RESET,
+    S_RED_PICKUP,
+    S_RED_DROPPED,
+    S_RED_RETURNED,
+    S_RED_SCORE,
+    S_RED_RESET,
+
+    S_LEFT,
+    S_ONLINE,
+    S_TEAMKILL,
+    S_ALLCHAT,
+    S_FRIENDSCHAT,
+    S_TEAMCHAT,
+
+    S_FRIENDADDED,
+    S_FRIENDREMOVED,
+    S_FRIENDEXISTS,
+    S_FRIENDNOTFOUND,
 
     S_BURN,
     S_CHAINSAW_ATTACK,
     S_CHAINSAW_IDLE,
 
     S_HIT,
-    
-    S_FLAGFAIL
+
+    S_FLAGFAIL      // wont be used anymore
 };
 
 // network messages codes, c2s, c2c, s2c
