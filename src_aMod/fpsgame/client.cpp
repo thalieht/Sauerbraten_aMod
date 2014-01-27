@@ -1165,6 +1165,33 @@ namespace game
     }
 
     extern int deathscore;
+    VARP(allchatcolorchoice, 0, 0, 16);
+    VARP(teamchatcolorchoice, 0, 1, 16);
+
+    char chatcolors(char textcolorchoice)
+    {
+        switch(textcolorchoice)
+        {
+            case 0:   return '0'; break;
+            case 1:   return '1'; break;
+            case 2:   return '2'; break;
+            case 3:   return '3'; break;
+            case 4:   return '4'; break;
+            case 5:   return '5'; break;
+            case 6:   return '6'; break;
+            case 7:   return '7'; break;
+            case 8:   return '8'; break;
+            case 9:   return '9'; break;
+            case 10:  return 'b'; break;
+            case 11:  return 'g'; break;
+            case 12:  return 'h'; break;
+            case 13:  return 'm'; break;
+            case 14:  return 'o'; break;
+            case 15:  return 'p'; break;
+            case 16:  return 'y'; break;
+            default:  return '0'; break;
+        }
+    }
 
     void parsemessages(int cn, fpsent *d, ucharbuf &p)
     {
@@ -1248,7 +1275,7 @@ namespace game
                 if(isignored(d->clientnum)) break;
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
                     particle_textcopy(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
-                conoutf(CON_CHAT, "%s:\f0 %s", colorname(d), text);
+                conoutf(CON_CHAT, "%s:\f%c %s", colorname(d), chatcolors(allchatcolorchoice), text);
 
                 if(chatsounds) isfriend(d->name) > 0 ? playsound(S_FRIENDSCHAT) : playsound(S_ALLCHAT);
                 break;
@@ -1263,7 +1290,7 @@ namespace game
                 if(!t || isignored(t->clientnum)) break;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, 0x6496FF, 4.0f, -8);
-                conoutf(CON_TEAMCHAT, "%s:\f1 %s", colorname(t), text);
+                conoutf(CON_TEAMCHAT, "%s:\f%c %s", colorname(t), chatcolors(teamchatcolorchoice), text);
 
                 if(chatsounds) isfriend(t->name) > 0 ? playsound(S_FRIENDSCHAT) : playsound(S_ALLCHAT);
                 break;
