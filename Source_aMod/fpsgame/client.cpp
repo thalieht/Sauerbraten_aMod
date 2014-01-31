@@ -2042,10 +2042,10 @@ namespace game
             NameFromFile[Length_Of_String] = '\0';      // replace it with '\0'
     }
 
-    unsigned short isfriend(const char *PlayerName)
+    unsigned int isfriend(const char *PlayerName)
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_Pointer = fopen("aMod\\friendlist.cfg","r");
         if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
         else while (fgets (NameFromFile, sizeof NameFromFile, file_Pointer) != NULL)
@@ -2064,7 +2064,7 @@ namespace game
     void fadd(const char *PlayerName)
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_Pointer = fopen("aMod\\friendlist.cfg","a+");
         if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file.");
         else while (fgets(NameFromFile, 16, file_Pointer) != NULL)
@@ -2093,7 +2093,7 @@ namespace game
     void faddcn(int cn)
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_Pointer = fopen("aMod\\friendlist.cfg","a+");
         if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file.");
         else while (fgets(NameFromFile, sizeof NameFromFile, file_Pointer) != NULL)
@@ -2126,7 +2126,7 @@ namespace game
     void frm(char *PlayerName)
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_PointerOLD = fopen("aMod\\friendlist.cfg","r");
         FILE *file_PointerNEW = fopen("aMod\\temp.cfg","w");
         if (file_PointerNEW == NULL) conoutf("\f3ERROR: Couldn't create temp file aMod/temp.cfg");
@@ -2173,7 +2173,7 @@ namespace game
     void frmpos(int position)
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_PointerOLD = fopen("aMod\\friendlist.cfg","r");
         FILE *file_PointerNEW = fopen("aMod\\temp.cfg","w");
         if (file_PointerNEW == NULL) conoutf("\f3ERROR: Couldn't create temp file aMod/temp.cfg");
@@ -2205,7 +2205,7 @@ namespace game
             fclose(file_PointerOLD);                                // if i dont reopen it, it wont work
             file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // dunno why
             if (file_PointerOLD == NULL) conoutf("\f3ERROR: Couldn't reopen file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
-            unsigned short index = 0;
+            unsigned int index = 0;
             while (fgets(NameFromFile, sizeof NameFromFile, file_PointerOLD) != NULL)
             {
                 ++index;
@@ -2234,7 +2234,7 @@ namespace game
     void frmcn(int cn)
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_PointerOLD = fopen("aMod\\friendlist.cfg","r");
         FILE *file_PointerNEW = fopen("aMod\\temp.cfg","w");
         if (file_PointerNEW == NULL) conoutf("\f3ERROR: Couldn't create temp file aMod/temp.cfg");
@@ -2290,7 +2290,7 @@ namespace game
     void flist()
     {
         char NameFromFile[16];
-        unsigned short FriendCounter = 0;
+        unsigned int FriendCounter = 0;
         FILE *file_Pointer = fopen("aMod\\friendlist.cfg","r");
         if (file_Pointer == NULL) conoutf("\f3ERROR: Couldn't open file. Does aMod/friendlist.cfg exist in your sauerbraten folder?");
         else while (fgets(NameFromFile, sizeof NameFromFile, file_Pointer) != NULL)
