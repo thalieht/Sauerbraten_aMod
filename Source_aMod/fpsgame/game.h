@@ -769,7 +769,7 @@ namespace game
     extern void c2sinfo(bool force = false);
     extern void sendposition(fpsent *d, bool reliable = false);
 
-    extern unsigned int isfriend(const char *PlayerName);
+    extern int isfriend(const char *PlayerName);
 
     // monster
     struct monster;
