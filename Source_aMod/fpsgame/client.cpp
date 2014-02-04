@@ -840,7 +840,16 @@ namespace game
         }
     }
 
-    void toserver(char *text) { conoutf(CON_CHAT, "%s:\f0 %s", colorname(player1), text); addmsg(N_TEXT, "rcs", player1, text); }
+    void toserver(char *text)
+    {
+        if(player1->state == CS_DEAD)
+            conoutf(CON_CHAT, "\fx%s:\fu %s", colorname(player1), text);
+        else if (player1->state != CS_DEAD)
+            conoutf(CON_CHAT, "\fx%s:\fv %s", colorname(player1), text);
+        else conoutf(CON_CHAT, "%s:\f0 %s", colorname(player1), text); // original
+        addmsg(N_TEXT, "rcs", player1, text);
+    }
+
     COMMANDN(say, toserver, "C");
 
     void sayteam(char *text) { conoutf(CON_TEAMCHAT, "%s:\f1 %s", colorname(player1), text); addmsg(N_SAYTEAM, "rcs", player1, text); }
@@ -1165,33 +1174,6 @@ namespace game
     }
 
     extern int deathscore;
-    VARP(allchatcolorchoice, 0, 0, 16);
-    VARP(teamchatcolorchoice, 0, 1, 16);
-
-    char chatcolors(char textcolorchoice)
-    {
-        switch(textcolorchoice)
-        {
-            case 0:   return '0'; break;
-            case 1:   return '1'; break;
-            case 2:   return '2'; break;
-            case 3:   return '3'; break;
-            case 4:   return '4'; break;
-            case 5:   return '5'; break;
-            case 6:   return '6'; break;
-            case 7:   return '7'; break;
-            case 8:   return '8'; break;
-            case 9:   return '9'; break;
-            case 10:  return 'b'; break;
-            case 11:  return 'g'; break;
-            case 12:  return 'h'; break;
-            case 13:  return 'm'; break;
-            case 14:  return 'o'; break;
-            case 15:  return 'p'; break;
-            case 16:  return 'y'; break;
-            default:  return '0'; break;
-        }
-    }
 
     void parsemessages(int cn, fpsent *d, ucharbuf &p)
     {
@@ -1275,8 +1257,20 @@ namespace game
                 if(isignored(d->clientnum)) break;
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
                     particle_textcopy(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
-                conoutf(CON_CHAT, "%s:\f%c %s", colorname(d), chatcolors(allchatcolorchoice), text);
-
+                //conoutf(CON_CHAT, "%s:\f0 %s", colorname(d), text); // original
+                if(isteam(player1->team, d->team))
+                {
+                    if(d->state == CS_DEAD)  // more likely to talk when dead so put it first
+                        conoutf(CON_CHAT, "\f1%s:\fz %s", colorname(d), text);
+                    else if(d->state != CS_SPECTATOR)
+                        conoutf(CON_CHAT, "\f1%s:\fq %s", colorname(d), text);
+                }
+                else if(d->state == CS_DEAD) // more likely to talk when dead so put it first
+                    conoutf(CON_CHAT, "\f3%s:\ft %s", colorname(d), text);
+                else if(d->state != CS_SPECTATOR)
+                    conoutf(CON_CHAT, "\f3%s:\fw %s", colorname(d) , text);
+                if(d->state == CS_SPECTATOR)
+                    conoutf(CON_CHAT, "\fe%s:\fa %s", colorname(d), text);
                 if(chatsounds) isfriend(d->name) > 0 ? playsound(S_FRIENDSCHAT) : playsound(S_ALLCHAT);
                 break;
             }
@@ -1290,7 +1284,12 @@ namespace game
                 if(!t || isignored(t->clientnum)) break;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, 0x6496FF, 4.0f, -8);
-                conoutf(CON_TEAMCHAT, "%s:\f%c %s", colorname(t), chatcolors(teamchatcolorchoice), text);
+                //conoutf(CON_TEAMCHAT, "%s:\f1 %s", colorname(t), text); //original
+                if(t->state == CS_ALIVE) // more likely to be alive when teamchatting so first
+                    conoutf(CON_TEAMCHAT, "\ff%s:\fk %s", colorname(t), text);
+                else if(t->state == CS_DEAD)
+                    conoutf(CON_TEAMCHAT, "\ff%s:\fd %s", colorname(t), text);
+                else conoutf(CON_TEAMCHAT, "\ff%s:\f1 %s", colorname(t), text);
 
                 if(chatsounds) isfriend(t->name) > 0 ? playsound(S_FRIENDSCHAT) : playsound(S_ALLCHAT);
                 break;
@@ -2054,7 +2053,7 @@ namespace game
             if(strcmp(NameFromFile, PlayerName) == 0)
             {
                 ++FriendCounter;
-                break;
+                break; // we got what we needed, time to bail
             }
         }
         fclose(file_Pointer);
@@ -2144,7 +2143,7 @@ namespace game
             fclose(file_PointerOLD);
             fclose(file_PointerNEW);
         }
-        if(FriendCounter > 0) // reading again, costs less than writting (ssd's)
+        if(FriendCounter > 0)
         {
             fclose(file_PointerOLD);                                // if i dont reopen it wont work
             file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // dunno why
@@ -2200,7 +2199,7 @@ namespace game
             fclose(file_PointerOLD);
             fclose(file_PointerNEW);
         }
-        else // reading again, costs less than writting (ssd's)
+        else
         {
             fclose(file_PointerOLD);                                // if i dont reopen it, it wont work
             file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // dunno why
@@ -2210,7 +2209,7 @@ namespace game
             {
                 ++index;
                 replacelastchar(NameFromFile);
-                if(index != position)
+                if(index != position) // re-write friendlist without the name assigned to the chosen position
                 {
                     if(ftell(file_PointerNEW) != 0)         // check if file is empty
                         fputc('\n', file_PointerNEW);
@@ -2252,7 +2251,7 @@ namespace game
             fclose(file_PointerOLD);
             fclose(file_PointerNEW);
         }
-        if(FriendCounter > 0) // reading again, costs less than writting (ssd's)
+        if(FriendCounter > 0)
         {
             fclose(file_PointerOLD);                                // if i dont reopen it
             file_PointerOLD = fopen("aMod\\friendlist.cfg","r");    // it wont work, dunno why

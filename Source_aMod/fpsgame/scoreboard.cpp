@@ -3,8 +3,9 @@
 
 namespace game
 {
-    HVARP(fhighlightcolor, 0x000000, 0x80C880, 0xFFFFFF); // highlight color of your friends in scoreboard
-    HVARP(highlightcolor, 0x000000, 0x808080, 0xFFFFFF);  // highlight color of yourself in scoreboard
+    HVARP(fhighlightcolor, 0x000000, 0x80C880, 0xFFFFFF);     // highlight color of your friends in scoreboard
+    HVARP(spectatedhighlightcolor, 0x000000, 0x05FFFF, 0xFFFFFF);  // highlight color of yourself in scoreboard
+    HVARP(highlightcolor, 0x000000, 0x808080, 0xFFFFFF);      // highlight color of yourself in scoreboard
 
     VARP(scoreboard2d, 0, 1, 1);
     VARP(showservinfo, 0, 1, 1);
@@ -205,21 +206,40 @@ namespace game
                 g.poplist();
             }
             g.text("", 0, " ");
+
+            fpsent *f = followingplayer();
             loopscoregroup(o,
             {
                 int FriendClientNum = -1;
                 if(isfriend(o->name) > 0)
                     FriendClientNum = o->clientnum;
-                if((o->clientnum==FriendClientNum || o==player1) && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1))
-                {
+                if
+                (
+                    (o->clientnum==FriendClientNum   // highlght friends
+                    || o==f                 // highlight watched player
+                    || o==player1)          // highlight yourself
+                    && highlightscore
+                    && (multiplayer(false) || demoplayback || players.length() > 1)
+                ){
                     g.pushlist();
-                    g.background(o==player1 ? highlightcolor : fhighlightcolor, numgroups>1 ? 3 : 5);
-                }
+                    g.background
+                    (
+                       (o==f && o->clientnum==FriendClientNum) || o==f  ? spectatedhighlightcolor  :
+                        o->clientnum==FriendClientNum ? fhighlightcolor : highlightcolor
+                        ,numgroups>1 ? 3 : 5
+                    );
+                 }
                 const playermodelinfo &mdl = getplayermodelinfo(o);
                 const char *icon = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? mdl.blueicon : mdl.redicon) : mdl.ffaicon;
                 g.text("", 0, icon);
-                if((o->clientnum==FriendClientNum || o==player1) && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1))
-                    g.poplist();
+                if
+                (
+                    (o->clientnum==FriendClientNum   // highlght friends
+                    || o==f                 // highlight watched player
+                    || o==player1)          // highlight yourself
+                    && highlightscore
+                    && (multiplayer(false) || demoplayback || players.length() > 1)
+                ) g.poplist();
             });
             g.poplist();
 

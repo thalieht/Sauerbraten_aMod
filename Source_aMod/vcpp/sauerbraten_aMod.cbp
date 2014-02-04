@@ -7,8 +7,8 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="client64">
-				<Option output="../../bin64/sauerbraten_aMod.exe" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../" />
+				<Option output="../../../bin64/sauerbraten_aMod.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../../" />
 				<Option object_output=".objs/client64" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -51,8 +51,8 @@
 				</Environment>
 			</Target>
 			<Target title="client32">
-				<Option output="../../bin/sauerbraten_aMod.exe" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../" />
+				<Option output="../../../bin/sauerbraten_aMod.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../../" />
 				<Option object_output=".objs/client32" />
 				<Option type="0" />
 				<Option compiler="gcc" />

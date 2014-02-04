@@ -196,6 +196,45 @@ static float draw_char(Texture *&tex, int c, float x, float y, float scale)
     return scale*info.advance;
 }
 
+// text color variables controlled by gui or "/varName number" (but that would be impractical)
+// Name explanation: example colorRe: color<Red or Green or Blue> <output to char 'e'> eg in cubescript ^fe
+VARP(colorRq, 0, 1   ,255);
+VARP(colorGq, 0, 255 ,255);
+VARP(colorBq, 0, 255 ,255);
+VARP(colorRw, 0, 1   ,255);
+VARP(colorGw, 0, 255 ,255);
+VARP(colorBw, 0, 255 ,255);
+VARP(colorRe, 0, 255 ,255);
+VARP(colorGe, 0, 13  ,255);
+VARP(colorBe, 0, 170 ,255);
+VARP(colorRz, 0, 1   ,255);
+VARP(colorGz, 0, 255 ,255);
+VARP(colorBz, 0, 255 ,255);
+VARP(colorRt, 0, 1   ,255);
+VARP(colorGt, 0, 255 ,255);
+VARP(colorBt, 0, 255 ,255);
+VARP(colorRa, 0, 255 ,255);
+VARP(colorGa, 0, 255 ,255);
+VARP(colorBa, 0, 1   ,255);
+VARP(colorRx, 0, 255 ,255);
+VARP(colorGx, 0, 255 ,255);
+VARP(colorBx, 0, 255 ,255);
+VARP(colorRu, 0, 64  ,255);
+VARP(colorGu, 0, 255 ,255);
+VARP(colorBu, 0, 128 ,255);
+VARP(colorRv, 0, 64  ,255);
+VARP(colorGv, 0, 255 ,255);
+VARP(colorBv, 0, 128 ,255);
+VARP(colorRk, 0, 50  ,255);
+VARP(colorGk, 0, 139 ,255);
+VARP(colorBk, 0, 50  ,255);
+VARP(colorRd, 0, 169 ,255);
+VARP(colorGd, 0, 139 ,255);
+VARP(colorBd, 0, 50  ,255);
+VARP(colorRf, 0, 10  ,255);
+VARP(colorGf, 0, 162 ,255);
+VARP(colorBf, 0, 255 ,255);
+
 //stack[sp] is current color index
 static void text_color(char c, char *stack, int size, int &sp, bvec color, int a)
 {
@@ -228,6 +267,18 @@ static void text_color(char c, char *stack, int size, int &sp, bvec color, int a
             case 'o': color = bvec(255, 148,   0); break;   // new orange
             case 'p': color = bvec(255,   0,   0); break;   // new red
             case 'y': color = bvec(255, 255,   0); break;   // new yellow
+            case 'q': color = bvec(colorRq, colorGq, colorBq); break;   // adjustable ingame
+            case 'w': color = bvec(colorRw, colorGw, colorBw); break;   // adjustable ingame
+            case 'e': color = bvec(colorRe, colorGe, colorBe); break;   // adjustable ingame
+            case 'z': color = bvec(colorRz, colorGz, colorBz); break;   // adjustable ingame
+            case 't': color = bvec(colorRt, colorGt, colorBt); break;   // adjustable ingame
+            case 'a': color = bvec(colorRa, colorGa, colorBa); break;   // adjustable ingame
+            case 'x': color = bvec(colorRx, colorGx, colorBx); break;   // adjustable ingame
+            case 'u': color = bvec(colorRu, colorGu, colorBu); break;   // adjustable ingame
+            case 'v': color = bvec(colorRv, colorGv, colorBv); break;   // adjustable ingame
+            case 'k': color = bvec(colorRk, colorGk, colorBk); break;   // adjustable ingame
+            case 'd': color = bvec(colorRd, colorGd, colorBd); break;   // adjustable ingame
+            case 'f': color = bvec(colorRf, colorGf, colorBf); break;   // adjustable ingame
             // provided color: everything else
         }
         glColor4ub(color.x, color.y, color.z, a);

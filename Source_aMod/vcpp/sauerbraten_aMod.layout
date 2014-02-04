@@ -1,34 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="All" />
-	<File name="..\fpsgame\client.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="54305" topLine="1379" />
-		</Cursor>
-	</File>
 	<File name="..\shared\command.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1575" topLine="50" />
 		</Cursor>
 	</File>
-	<File name="..\engine\client.cpp" open="1" top="1" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1830" topLine="49" />
-		</Cursor>
-	</File>
 	<File name="..\fpsgame\fps.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="12069" topLine="423" />
+			<Cursor1 position="29100" topLine="860" />
 		</Cursor>
 	</File>
 	<File name="..\fpsgame\game.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="24761" topLine="546" />
+			<Cursor1 position="5444" topLine="103" />
 		</Cursor>
 	</File>
-	<File name="..\fpsgame\scoreboard.cpp" open="1" top="0" tabpos="23" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\engine\command.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="199" topLine="0" />
+			<Cursor1 position="3067" topLine="125" />
+		</Cursor>
+	</File>
+	<File name="..\fpsgame\scoreboard.cpp" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7842" topLine="150" />
 		</Cursor>
 	</File>
 	<File name="..\fpsgame\weapon.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -36,9 +31,24 @@
 			<Cursor1 position="29232" topLine="678" />
 		</Cursor>
 	</File>
-	<File name="..\engine\command.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\engine\rendertext.cpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3067" topLine="125" />
+			<Cursor1 position="5216" topLine="256" />
+		</Cursor>
+	</File>
+	<File name="..\shared\iengine.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="10562" topLine="224" />
+		</Cursor>
+	</File>
+	<File name="..\fpsgame\client.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="47045" topLine="1281" />
+		</Cursor>
+	</File>
+	<File name="..\engine\client.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1830" topLine="237" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

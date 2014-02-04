@@ -12,3 +12,8 @@ A mod that adds:
   * Particle: you can replace the smoke trail with snow, water, steam, flame or spark.
     You can also use "lightning" as trail and/or "laser" as trail (pistol trail).
 * Different sounds per team for flag captures/drops/returns/resets/takes (can change them in aMod/sounds.cfg).
+* Client side (only you can see them) changeable chat colors ingame (inspired by sauerFR) for: Self name, Self     chat, allies's chat when dead, allies's chat when alive, enemies's chat when dead, enemies's chat when alive,       names teamchatting, teamchat, spectators's   name, spectators's chat
+* Show spectated person's cn in hud even when there are no duplicate names (white color) or pink color if there
+  are duplicate names.
+  * Highlight spectated person in scoreboard with changeable highlight color (overwrites friend color while
+    spectating a friend)	

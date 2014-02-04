@@ -872,7 +872,15 @@ namespace game
                     color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
                     if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
                 }
-                draw_text(colorname(f), w*1800/h - fw - pw, 1650 - fh, (color>>16)&0xFF, (color>>8)&0xFF, color&0xFF);
+                int CNw;
+                defformatstring(specCN)(" (%d)", f->clientnum);
+                text_bounds(specCN, CNw, fh);
+                defformatstring(Spectated_Name_And_CN)("%s (%d)", colorname(f), f->clientnum);
+               // draw_text(colorname(f), w*1800/h - fw - pw, 1650 - fh, (color>>16)&0xFF, (color>>8)&0xFF, color&0xFF);
+                draw_text(strcmp(colorname(f), f->name)==0  ?  Spectated_Name_And_CN : colorname(f)
+                                 , w*1800/h - fw - pw  // untouched
+                                 - (strcmp(colorname(f), f->name)==0 ? CNw : 0)
+                                 , 1650 - fh, (color>>16)&0xFF, (color>>8)&0xFF, color&0xFF);
             }
         }
 
